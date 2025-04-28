@@ -13,7 +13,7 @@ Original file is located at
 #!pip install matplotlib
 
 import cv2
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 import numpy as np
 import easyocr
 import imutils
