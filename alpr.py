@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 #DEPENDENCIES
 #  easyocr
 #  imutils
@@ -50,7 +48,6 @@ for contour in contours:
         break
 #print("Location: ", location)
 
-
 #create blank image with same dimensions as the original image
 mask = np.zeros(gray.shape, np.uint8)
 #Draw contours on the mask image
@@ -60,20 +57,23 @@ new_image = cv2.bitwise_and(img, img, mask=mask)
 #show the final image
 #plt.imshow(cv2.cvtColor(new_image, cv2.COLOR_BGR2RGB))
 
+#Find the co-ordinates of the four corners of the document
+(x,y) = np.where(mask==255)
+#Find the top left corner
+(x1, y1) = (np.min(x), np.min(y))
+#Find the bottom right corner
+(x2, y2) = (np.max(x), np.max(y))
+#Crop the image using the co-ordinates
+cropped_image = gray[x1:x2+1, y1:y2+1]
+#show the cropped image
+#plt.imshow(cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB))
 
-(x,y) = np.where(mask==255) #Find the co-ordinates of the four corners of the document
-(x1, y1) = (np.min(x), np.min(y)) #Find the top left corner
-(x2, y2) = (np.max(x), np.max(y)) #Find the bottom right corner
-cropped_image = gray[x1:x2+1, y1:y2+1] #Crop the image using the co-ordinates
-
-#plt.imshow(cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB)) #show the cropped image
-
-reader = easyocr.Reader(['en']) #create an easyocr reader object with english as the language
-result = reader.readtext(cropped_image) #read text from the cropped image
-#result
-
-text = result[0][-2] #Extract the text from the result
-
+#create an easyocr reader object with english as the language
+reader = easyocr.Reader(['en'])
+#read text from the cropped image
+result = reader.readtext(cropped_image)
+#Extract the text from the result
+text = result[0][-2]
 print(text)
 
 #font = cv2.FONT_HERSHEY_SIMPLEX #Font style
