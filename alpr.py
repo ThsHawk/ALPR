@@ -50,7 +50,7 @@ for contour in contours:
 #print("Location: ", location)
 
 #create blank image with same dimensions as the original image
-mask = np.zeros(gray.shape, np.uint8)
+mask = np.zeros(gray.shape, np.int32)
 #Draw contours on the mask image
 new_image = cv2.drawContours(mask, [location], 0,255, -1)
 #Take bitwise AND between the original image and mask image
