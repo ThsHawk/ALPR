@@ -1,6 +1,6 @@
 import time
 import sys
-import Alpr
+from Alpr import Alpr
 
 if len(sys.argv) < 2 :
     print("Err: no path.")
