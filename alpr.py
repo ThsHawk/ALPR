@@ -18,7 +18,7 @@ dataSetPath = path + "/images/"
 
 #read image
 #img = cv2.imread(dataSetPath + "Cars0.png")
-img = cv2.imread("carro.jpeg")
+img = cv2.imread("/home/thales/alpr/carro.jpeg")
 #plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
 #plt.title('Original Image')
 #plt.show()
