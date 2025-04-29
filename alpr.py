@@ -47,7 +47,7 @@ for contour in contours:
     if len(approx) == 4:
         location = approx
         break
-#print("Location: ", location)
+print("Location: ", location)
 
 #create blank image with same dimensions as the original image
 mask = np.zeros(gray.shape, np.uint8)
