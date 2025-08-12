@@ -44,7 +44,7 @@ class Alpr:
         #Draw contours on the mask image
         new_image = cv2.drawContours(mask, [location], 0,255, -1)
         #Take bitwise AND between the original image and mask image
-        new_image = cv2.bitwise_and(img, img, mask=mask)
+        new_image = cv2.bitwise_and(self.img, self.img, mask=mask)
 
         #Find the co-ordinates of the four corners of the document
         (x,y) = np.where(mask==255)
@@ -60,7 +60,7 @@ class Alpr:
         #read text from the cropped image
         result = reader.readtext(cropped_image)
         #Extract the text from the result
-        return result[0][-2]
+        return result
 
 #font = cv2.FONT_HERSHEY_SIMPLEX #Font style
 #res = cv2.putText(img, text=text, org=(approx[0][0][0], approx[1][0][1]+60), fontFace=font, fontScale=1, color=(0,255,0), thickness=2, lineType=cv2.LINE_AA) #put the text on the image
