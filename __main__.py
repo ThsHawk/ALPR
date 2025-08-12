@@ -1,5 +1,6 @@
 import time
 import sys
+import pprint
 from Alpr import Alpr
 
 if len(sys.argv) < 2 :
