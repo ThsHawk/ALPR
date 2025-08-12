@@ -9,5 +9,5 @@ if len(sys.argv) < 2 :
 
 inst = Alpr(sys.argv[1])
 text = inst.recognize()
-pprint(text)
+pprint.pprint(text)
 
