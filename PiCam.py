@@ -1,31 +1,40 @@
 import cv2
+from picamera2 import Picamera2
 import time
 
 class PiCam:
-    def __init__(self, camera_index=0, process_interval=2.0):
+    def __init__(self, process_interval=2.0):
         """
-        Inicializa o processador de câmera.
+        Inicializa o processador de câmera usando a biblioteca picamera2.
         
         Args:
-            camera_index (int): Índice da câmera a ser usada (0 é a padrão).
             process_interval (float): Intervalo de tempo (em segundos) entre cada processamento de imagem.
         """
-        self.camera_index = camera_index
+        self.picam2 = Picamera2()
         self.process_interval = process_interval
-        self.cap = cv2.VideoCapture(self.camera_index)
         self.last_capture_time = time.time()
         self.is_running = True
 
-        if not self.cap.isOpened():
-            print("Erro: Não foi possível abrir a câmera. Verifique a conexão e as configurações.")
-            self.is_running = False
+        # Configura a câmera para usar o modo de vídeo
+        config = self.picam2.create_preview_configuration(main={"size": (640, 480)})
+        self.picam2.configure(config)
+        self.picam2.start()
 
     def get_latest_frame(self):
-        """Lê e retorna o último frame do stream de vídeo."""
-        ret, frame = self.cap.read()
-        if not ret:
-            print("Erro: Não foi possível ler o frame.")
+        """
+        Lê e retorna o último frame do stream de vídeo como um array NumPy.
+        A picamera2 retorna o frame em formato BGR, pronto para o OpenCV.
+        """
+        # Captura o frame como um array NumPy
+        frame = self.picam2.capture_array()
+        
+        if frame is None:
             return None
+        
+        # A picamera2 captura em formato RGB por padrão. O OpenCV usa BGR.
+        # Precisamos converter.
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+
         return frame
 
     def should_process(self):
@@ -37,7 +46,6 @@ class PiCam:
         return False
     
     def release_camera(self):
-        """Libera o objeto da câmera e fecha as janelas."""
-        if self.cap.isOpened():
-            self.cap.release()
+        """Para a câmera e fecha as janelas."""
+        self.picam2.stop()
         cv2.destroyAllWindows()

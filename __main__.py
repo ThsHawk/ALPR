@@ -5,12 +5,12 @@ import pprint
 from Alpr import Alpr
 from PiCam import PiCam
 
-if len(sys.argv) < 2 :
-    print("Err: no path.")
-    exit()
+#if len(sys.argv) < 2 :
+#    print("Err: no path.")
+#    exit()
 
 cam = PiCam(process_interval=2.0)
-if not cam.is_running():
+if not cam.is_running:
     exit()
 
 while cam.is_running:
@@ -22,14 +22,12 @@ while cam.is_running:
     # Verifica se é hora de processar
     if cam.should_process():
         print("Processando um novo frame...")
-
         inst = Alpr(frame)
         text = inst.recognize()
-        pprint.pprint(text)
+        if text is not None: print("Placa Encontrada: " + text)
 
     # Pressionar 'q' para sair
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+    if cv2.waitKey(1) & 0xFF == ord('q'): break
 
 # Limpeza
 cam.release_camera()

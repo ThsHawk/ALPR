@@ -12,14 +12,16 @@ import imutils
 import random
 
 class Alpr:
-    def __init__(self, path):
+    def __init__(self, frame):
         #read image
-        self.img = cv2.imread(path)
+        self.img = frame
 
     def recognize(self):
         #convert image to gray
         gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
         bfilter = cv2.bilateralFilter(gray, 11, 17, 17) #Noise reduction
+
+        cv2.imwrite("./imgDebug/filteredInput.jpg", bfilter)
 
         #Edge detection
         edged = cv2.Canny(bfilter, 30, 200)
@@ -39,12 +41,19 @@ class Alpr:
                 location = approx
                 break
 
+        if location is None: return None
+
+        #Verify if the contour fit in retangular aproximation
+        x, y, w, h = cv2.boundingRect(contour)
+        aspect_ratio = w / float(h)
+        if not aspect_ratio >= 2 and aspect_ratio <= 5: return None
+
         #create blank image with same dimensions as the original image
         mask = np.zeros(gray.shape, np.uint8)
         #Draw contours on the mask image
-        new_image = cv2.drawContours(mask, [location], 0,255, -1)
+        cv2.drawContours(mask, [location], 0,255, -1)
         #Take bitwise AND between the original image and mask image
-        new_image = cv2.bitwise_and(self.img, self.img, mask=mask)
+        cv2.bitwise_and(self.img, self.img, mask=mask)
 
         #Find the co-ordinates of the four corners of the document
         (x,y) = np.where(mask==255)
@@ -55,15 +64,20 @@ class Alpr:
         #Crop the image using the co-ordinates
         cropped_image = gray[x1:x2+1, y1:y2+1]
 
+        cv2.imwrite("./imgDebug/cropped_image.jpg", cropped_image)
+
         #create an easyocr reader object with english as the language
-        reader = easyocr.Reader(['br'])
+        reader = easyocr.Reader(['en'])
         #read text from the cropped image
         result = reader.readtext(cropped_image)
+        if result is None: return None
+        
         #Extract the text from the result
-        return result
-
-#font = cv2.FONT_HERSHEY_SIMPLEX #Font style
-#res = cv2.putText(img, text=text, org=(approx[0][0][0], approx[1][0][1]+60), fontFace=font, fontScale=1, color=(0,255,0), thickness=2, lineType=cv2.LINE_AA) #put the text on the image
-#res = cv2.rectangle(img, tuple(approx[0][0]), tuple(approx[2][0]), (0,255,0),3) #Draw a rectangle around the text
-
-#plt.imshow(cv2.cvtColor(res, cv2.COLOR_BGR2RGB)) #show the final image with text
+        plate_text = []
+        for (bbox, recognized_text, confidence) in result:
+            if confidence > 0.5: plate_text.append(recognized_text)
+        if plate_text is None: return None
+        #Extraxt the code license of plate info
+        for text in plate_text:
+            if len(text)==7: return text        
+        return None
