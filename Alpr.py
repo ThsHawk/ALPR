@@ -56,7 +56,7 @@ class Alpr:
         cropped_image = gray[x1:x2+1, y1:y2+1]
 
         #create an easyocr reader object with english as the language
-        reader = easyocr.Reader(['en'])
+        reader = easyocr.Reader(['br'])
         #read text from the cropped image
         result = reader.readtext(cropped_image)
         #Extract the text from the result
