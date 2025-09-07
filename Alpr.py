@@ -3,6 +3,8 @@
 #  imutils
 #  opencv-python
 #  matplotlib
+#  picamera2
+#  gpiozero 
 
 import cv2
 #from matplotlib import pyplot as plt

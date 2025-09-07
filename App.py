@@ -5,21 +5,23 @@ import pprint
 from Alpr import Alpr
 from DatabaseHandler import DatabaseHandler
 from PiCam import PiCam
+from ServoControler import ServoController
 
 #if len(sys.argv) < 2 :
 #    print("Err: no path.")
 #    exit()
 
 class App:
-    def __init__(self):
-        self.db_file_path = "registro.db"  
-        self.db = DatabaseHandler(self.db_file_path)
+    def __init__(self): 
+        self.db = DatabaseHandler()
         
         #
         self.cam = PiCam(process_interval=2.0)
         if not self.cam.is_running: exit()
         #
         self.plate = None
+        #
+        self.gate = ServoController(18)
 
     def frameProcess(self):
 
@@ -50,6 +52,14 @@ if __name__ == "__main__":
                 if isRegistered:
                     #
                     print("Acesso liberado para: " + description)
+                    app.gate.open_gate()
+                    time.sleep(1)
+                    time.sleep(3)
+                    app.gate.close_gate()
+                    time.sleep(1)
+                    app.gate.relax()
+
+
                 else:
                     print("Acesso negado, placa não identificada no registro!")
                     print("")
