@@ -14,7 +14,6 @@ class App:
     def __init__(self):
         self.db_file_path = "registro.db"  
         self.db = DatabaseHandler(self.db_file_path)
-        self.db.create_tables()
         
         #
         self.cam = PiCam(process_interval=2.0)
@@ -33,6 +32,7 @@ class App:
             print("Processando um novo frame...")
             inst = Alpr(frame)
             return inst.recognize()
+
              
 
     # Pressionar 'q' para sair
@@ -44,7 +44,6 @@ if __name__ == "__main__":
     while True:
         plate = app.frameProcess()
         if plate is not None:
-            plate = plate.upper()
             print("Placa encontrada: " + plate)
             with app.db as db:
                 isRegistered, description = db.is_plate_registered(plate)
@@ -56,6 +55,7 @@ if __name__ == "__main__":
                     print("")
         #else:
             #print("Placa não encontrada")
+
                 
 
     #

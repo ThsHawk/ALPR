@@ -176,3 +176,4 @@ cython_debug/
 #Debug during development
 imgDebug/
 *.db
+log.txt

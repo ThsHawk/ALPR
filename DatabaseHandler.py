@@ -2,7 +2,7 @@ import sqlite3
 from datetime import datetime
 
 class DatabaseHandler:
-    def __init__(self, db_file):
+    def __init__(self, db_file="registro.db"):
         """
         Inicializa o gerenciador do banco de dados e cria a conexão.
         
@@ -50,10 +50,11 @@ class DatabaseHandler:
         # Tabela 2: Log de acessos
         query_log = "CREATE TABLE IF NOT EXISTS access_log (id INTEGER PRIMARY KEY AUTOINCREMENT, plate_number TEXT NOT NULL, timestamp TEXT NOT NULL, access_granted BOOLEAN NOT NULL );"
         """
-        CREATE TABLE IF NOT EXISTS registered_plates (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            plate_number TEXT NOT NULL UNIQUE,
-            description TEXT
+        CREATE TABLE IF NOT EXISTS access_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT, 
+            plate_number TEXT NOT NULL, 
+            timestamp TEXT NOT NULL, 
+            access_granted BOOLEAN NOT NULL
         );
         """
         self.cursor.execute(query_log)
@@ -126,3 +127,43 @@ class DatabaseHandler:
         query = "SELECT * FROM registered_plates;"
         self.cursor.execute(query)
         return self.cursor.fetchall()
+    
+    def get_log(self):
+        """
+        Consulta e retorna todos os registros de log.
+        
+        Returns:
+            list: Uma lista de tuplas, onde cada tupla representa uma linha da tabela.
+        """
+        query = "SELECT * FROM access_log;"
+        self.cursor.execute(query)
+        return self.cursor.fetchall()
+    
+if __name__ == "__main__":
+    print("Select an option:")
+    print("[1]-Add Plate")
+    print("[2]-Del Plate")
+    print("[3]-List Plates")
+    print("[4]-Export log")
+    opt = input()
+
+    with DatabaseHandler() as db:
+        if opt == "1":
+            print("example: ABC1D23, Description")
+            data = input().split(", ")
+            db.register_plate(data[0].upper(), data[1])
+        elif opt == "2":
+            print("example: ABC1D23")
+            data = input().upper()
+            db.unregister_plate(data)
+        elif opt == "3":
+            plates = db.get_all_plates()
+            print(plates)
+        elif opt == "4":
+            log = db.get_log()
+            print(log)
+            with open("log.txt", 'w', newline='', encoding='utf-8') as file:
+                file.writelines(log)
+            print("Export operation succeed")
+        else:
+            print("Invalid option, exiting ....")

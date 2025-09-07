@@ -79,5 +79,5 @@ class Alpr:
         if plate_text is None: return None
         #Extraxt the code license of plate info
         for text in plate_text:
-            if len(text)==7: return text        
+            if len(text)==7: return text.upper()       
         return None
