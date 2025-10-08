@@ -1,0 +1,6 @@
+easyocr
+imutils
+opencv-python
+picamera2
+gpiozero 
+luma.lcd
