@@ -70,7 +70,7 @@ class Alpr:
         cv2.imwrite("./imgDebug/cropped_image.jpg", cropped_image)
 
         #create an easyocr reader object with english as the language
-        reader = easyocr.Reader(['pt'])
+        reader = easyocr.Reader(['pt'], gpu=False)
         #read text from the cropped image
         result = reader.readtext(cropped_image)
         if result is None: return None

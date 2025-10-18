@@ -6,6 +6,7 @@ from Alpr import Alpr
 from DatabaseHandler import DatabaseHandler
 from PiCam import PiCam
 from ServoControler import ServoController
+from TFTDisplay import TFTDisplay
 
 #if len(sys.argv) < 2 :
 #    print("Err: no path.")
@@ -22,6 +23,8 @@ class App:
         self.plate = None
         #
         self.gate = ServoController(18)
+        #
+        self.display = TFTDisplay()
 
     def frameProcess(self):
 
@@ -31,7 +34,8 @@ class App:
         
         # Verifica se é hora de processar
         if self.cam.should_process():
-            print("Processando um novo frame...")
+            print("Processando nova Imagem...")
+            self.display.show_message("Processando nova Imagem...")
             inst = Alpr(frame)
             return inst.recognize()
 
@@ -43,15 +47,19 @@ class App:
 
 if __name__ == "__main__":
     app = App()
+    app.display.show_message(">> Inicio do Programa! <<")
     while True:
         plate = app.frameProcess()
         if plate is not None:
             print("Placa encontrada: " + plate)
+            app.display.show_message("Placa encontrada: " + plate)
             with app.db as db:
+                db.create_tables()
                 isRegistered, description = db.is_plate_registered(plate)
                 if isRegistered:
                     #
                     print("Acesso liberado para: " + description)
+                    app.display.show_message("Acesso liberado para: " + description)
                     app.gate.open_gate()
                     time.sleep(1)
                     time.sleep(3)
@@ -62,7 +70,7 @@ if __name__ == "__main__":
 
                 else:
                     print("Acesso negado, placa não identificada no registro!")
-                    print("")
+                    app.display.show_message("Acesso negado, placa não identificada no registro!")
         #else:
             #print("Placa não encontrada")
 
