@@ -8,41 +8,35 @@ from PiCam import PiCam
 from ServoControler import ServoController
 from TFTDisplay import TFTDisplay
 
-#if len(sys.argv) < 2 :
-#    print("Err: no path.")
-#    exit()
-
 class App:
-    def __init__(self): 
+    def __init__(self):
+        # Inicializa o banco de dados local
         self.db = DatabaseHandler()
-        
-        #
+        # Inicializa a camera
         self.cam = PiCam(process_interval=2.0)
         if not self.cam.is_running: exit()
         #
         self.plate = None
-        #
+        # Inicializa o Servo
         self.gate = ServoController(18)
-        #
+        # Inicializa o display TFT
         self.display = TFTDisplay()
 
     def frameProcess(self):
-
         # Pega o frame mais recente do stream de vídeo
         frame = self.cam.get_latest_frame()
-        #if frame is None: break
-        
+        process = Alpr(frame)
+        plateFrame = None
         # Verifica se é hora de processar
         if self.cam.should_process():
-            print("Processando nova Imagem...")
-            self.display.show_message("Processando nova Imagem...")
-            inst = Alpr(frame)
-            return inst.recognize()
-
-             
-
-    # Pressionar 'q' para sair
-    #if cv2.waitKey(1) & 0xFF == ord('q'): break
+            print("Procurando uma placa...")
+            self.display.show_message("Procurando uma placa...")
+            plateFrame = process.search_plate()
+        
+        if plateFrame is not None:
+            print("Processando possível placa...")
+            self.display.show_message("Processando possível placa...")
+            return process.recognize(plateFrame)
 
 
 if __name__ == "__main__":
@@ -71,14 +65,4 @@ if __name__ == "__main__":
                 else:
                     print("Acesso negado, placa não identificada no registro!")
                     app.display.show_message("Acesso negado, placa não identificada no registro!")
-        #else:
-            #print("Placa não encontrada")
-
-                
-
-    #
-
-
-    # Limpeza
-    #cam.release_camera()
 

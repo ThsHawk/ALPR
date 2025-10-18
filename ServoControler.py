@@ -14,6 +14,9 @@ class ServoController:
         # para o seu modelo de servo específico, se necessário.
         self.servo = Servo(pin_number, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000, pin_factory=PiGPIOFactory())
         self.servo.value = None  # Inicia com o sinal desativado
+        self.servo.max()
+        time.sleep(0.5) # Pequena pausa para o servo se mover
+        self.move_to_position(0)
 
     def move_to_position(self, value):
         """
@@ -31,7 +34,7 @@ class ServoController:
         Move o servo para a posição que "abre" a cancela.
         """
         print("Abrindo cancela...")
-        self.servo.max()
+        self.move_to_position(0.5)
         time.sleep(1.5)
 
     def close_gate(self):
@@ -39,7 +42,7 @@ class ServoController:
         Move o servo para a posição que "fecha" a cancela.
         """
         print("Fechando cancela...")
-        self.servo.min()
+        self.move_to_position(-1)
         time.sleep(1.5)
 
     def relax(self):

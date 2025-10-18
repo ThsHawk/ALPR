@@ -19,12 +19,10 @@ class Alpr:
         #read image
         self.img = frame
 
-    def recognize(self):
+    def search_plate(self):
         #convert image to gray
         gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
         bfilter = cv2.bilateralFilter(gray, 11, 17, 17) #Noise reduction
-
-        cv2.imwrite("./imgDebug/filteredInput.jpg", bfilter)
 
         #Edge detection
         edged = cv2.Canny(bfilter, 30, 200)
@@ -65,14 +63,13 @@ class Alpr:
         #Find the bottom right corner
         (x2, y2) = (np.max(x), np.max(y))
         #Crop the image using the co-ordinates
-        cropped_image = gray[x1:x2+1, y1:y2+1]
+        return gray[x1:x2+1, y1:y2+1]
 
-        cv2.imwrite("./imgDebug/cropped_image.jpg", cropped_image)
-
+    def recognize(self, plate):
         #create an easyocr reader object with english as the language
         reader = easyocr.Reader(['pt'], gpu=False)
         #read text from the cropped image
-        result = reader.readtext(cropped_image)
+        result = reader.readtext(plate)
         if result is None: return None
         
         #Extract the text from the result

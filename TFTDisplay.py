@@ -26,9 +26,12 @@ class TFTDisplay:
             # Fonte padrão da PIL
             self.font = ImageFont.load_default()
             
-        # Determina a altura que o texto ocupará (necessário para calcular o número de linhas)
-        # O método getsize() é mais preciso, mas para fontes simples, o valor '12' é uma boa estimativa.
-        self.altura_linha = 12 
+        # Determina a altura da linha e a largura máxima de desenho
+        # getbbox() retorna (left, top, right, bottom). A altura é bottom - top.
+        _, top, _, bottom = self.font.getbbox('A')
+        self.altura_linha = (bottom - top) + 2 # Altura da fonte + pequeno espaçamento
+        self.margem_lateral = 2 # Margem em pixels para evitar que o texto encoste na borda
+        self.largura_max_texto = self.width - self.margem_lateral 
         
         # Calcula o número máximo de linhas que cabem no display
         self.num_linhas_max = self.height // self.altura_linha
@@ -38,6 +41,39 @@ class TFTDisplay:
         
         # Limpa o display na inicialização
         self.device.clear()
+
+    def _wrap_text_to_lines(self, text):
+        """
+        Divide uma string em uma lista de linhas que cabem na largura da tela
+        (em pixels), quebrando somente nos limites das palavras.
+        """
+        words = text.split()
+        if not words:
+            return [""]
+        
+        lines = []
+        current_line = words[0]
+
+        for word in words[1:]:
+            # Tenta adicionar a próxima palavra à linha atual
+            test_line = current_line + " " + word
+            
+            # Calcula a largura da linha de teste em pixels
+            # getbbox() retorna (left, top, right, bottom). A largura é right - left.
+            left, _, right, _ = self.font.getbbox(test_line)
+            largura = right - left
+            
+            if largura <= self.largura_max_texto:
+                # A palavra cabe, então a adicionamos
+                current_line = test_line
+            else:
+                # A palavra não cabe, finaliza a linha atual e começa uma nova
+                lines.append(current_line)
+                current_line = word # A nova linha começa com a palavra que não coube
+
+        # Adiciona a última linha restante
+        lines.append(current_line)
+        return lines
 
     def _redraw_terminal(self):
         """
@@ -59,12 +95,19 @@ class TFTDisplay:
     def show_message(self, message):
         """
         Adiciona uma nova mensagem ao buffer circular e redesenha o terminal.
+        Agora gerencia quebras de linha longas.
         """
-        # Adiciona a nova mensagem ao final do deque. 
-        # Se o buffer estiver cheio, o item mais antigo (topo) é automaticamente removido.
-        self.buffer_mensagens.append(message)
+        # 1. Quebra a mensagem longa em várias linhas se necessário
+        linhas_quebradas = self._wrap_text_to_lines(message)
         
-        # Redesenha a tela para mostrar a nova configuração do buffer
+        # 2. Adiciona CADA linha gerada ao buffer circular
+        # Isso garante que a rolagem funcione corretamente, tratando uma única 
+        # mensagem longa como várias linhas de terminal.
+        for linha in linhas_quebradas:
+            # O deque já gerencia o maxlen e a rolagem
+            self.buffer_mensagens.append(linha)
+        
+        # 3. Redesenha a tela para mostrar a nova configuração do buffer
         self._redraw_terminal()
 
     def clear(self):
